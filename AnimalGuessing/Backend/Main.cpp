@@ -4,6 +4,8 @@
 #include <fstream>
 #include <sstream>
 
+#include "NetworkHandler.hpp"
+
 struct Node
 {
 	std::string question;
@@ -103,10 +105,10 @@ Node* LoadTree(const std::string&& fileName)
 		std::ofstream newFile(fileName);
 
 		node = new Node{
-				"Czy to kot?",
+			"Czy to kot?",
 
-				nullptr,
-				nullptr
+			nullptr,
+			nullptr
 		};
 	}
 
@@ -115,6 +117,11 @@ Node* LoadTree(const std::string&& fileName)
 
 int main()
 {
+	NetworkHandler networkHandler;
+
+	networkHandler.Start();
+	
+	/*
 	Node* firstNode = LoadTree("Saved.tree");
 
 	std::cout << "Pomysl o jakims zwierzeciu a ten program sprobuje je zgadnac (sprobuj kilka razy, to sie uczy na bledach):\n";
@@ -183,4 +190,5 @@ int main()
 			SaveTree(firstNode, "Saved.tree");
 		}
 	}
+	*/
 }

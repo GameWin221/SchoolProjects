@@ -2,25 +2,27 @@
 
 #include <memory>
 #include <string>
-#include "resource.hpp"
-#include "settings.hpp"
+#include <restbed>
+#include <resource.hpp>
+#include <settings.hpp>
+#include <service.hpp>
 
 class NetworkHandler
 {
 public:
     NetworkHandler();
     
-    std::shared_ptr<restbed::Resource> GetResource() const { return m_Resource; };
-    std::shared_ptr<restbed::Settings> GetSettings() const { return m_Settings; };
+    void Start();
 
 private:
-    float Calculate(float num1, float num2, std::string operation);
+    std::tuple<std::string, std::string> Respond(std::string operation, std::string text);
+    std::tuple<std::string, std::string> GetPathParameters(const std::shared_ptr<restbed::Session> session) const;
 
-    std::tuple<float, float, std::string> GetPathParameters(const std::shared_ptr<restbed::Session> session) const;
-    std::string ToJson(float result);
+    std::string ToJson(std::string expectation, std::string response);
 
     void GetHandler(const std::shared_ptr<restbed::Session> session);
 
     std::shared_ptr<restbed::Resource> m_Resource;
     std::shared_ptr<restbed::Settings> m_Settings;
+    restbed::Service m_Service;
 };

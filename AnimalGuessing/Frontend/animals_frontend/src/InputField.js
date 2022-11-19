@@ -5,7 +5,10 @@ export default class InputField extends React.Component {
     constructor(props) {
         super(props);
         this.state = {value: ''};
-    
+        this.frontendApi = props.frontendApi;
+        this.label = props.label;
+        this.operation = props.operation;
+
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
       }
@@ -15,7 +18,14 @@ export default class InputField extends React.Component {
       }
     
       handleSubmit(event) {
-        alert('A question was submitted: ' + this.state.value);
+        let text = this.state.value.split(' ').join('_')
+
+        alert('Submitting ' + this.operation + ': ' + text);
+        
+        this.props.frontendApi.sendStr(this.operation, text, (expectation, response) => {
+          console.log('[' + expectation + ']: "' + response + '"')
+        });
+
         event.preventDefault();
       }
     
@@ -23,7 +33,7 @@ export default class InputField extends React.Component {
         return (
           <form onSubmit={this.handleSubmit}>
             <label>
-              Question:
+              {this.label + ' '}
               <input type="text" value={this.state.value} onChange={this.handleChange} />
             </label>
             <input type="submit" value="Submit" />

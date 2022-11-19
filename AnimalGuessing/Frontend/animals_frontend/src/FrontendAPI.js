@@ -3,15 +3,16 @@ export default class FrontendAPI {
         this.serviceAddress = serviceAddress
     }
 
-    makeURL(str) {
-        return new URL(str, this.serviceAddress);
+    makeURL(operation, text) {
+        const resource = operation + '/' + text
+        return new URL(resource, this.serviceAddress);
     }
 
-    sendStr(str, handler) {
-        fetch(this.makeURL(str))
+    sendStr(operation, text, handler) {
+        fetch(this.makeURL(operation, text))
             .then(res => res.json())
             .then((response)=>{
-                handler(response["result"]);
+                handler(response["expectation"], response["response"]);
             },
             (err) => {
                 handler(err);
