@@ -8,10 +8,11 @@ export default class FrontendHandler extends React.Component {
     //}
 
     sendAnswer(operation, text) {
-        alert('Sending answer: ' + text);
+        //alert('Sending answer: ' + text);
 
         this.props.frontendApi.sendStr(operation, text, (expectation, response) => {
             console.log('[' + expectation + ']: "' + response + '"')
+            alert(response);
         });
     }
 

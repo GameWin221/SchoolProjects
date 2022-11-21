@@ -20,10 +20,11 @@ export default class InputField extends React.Component {
       handleSubmit(event) {
         let text = this.state.value.split(' ').join('_')
 
-        alert('Submitting ' + this.operation + ': ' + text);
+        //alert('Submitting ' + this.operation + ': ' + text);
         
         this.props.frontendApi.sendStr(this.operation, text, (expectation, response) => {
           console.log('[' + expectation + ']: "' + response + '"')
+          alert(response);
         });
 
         event.preventDefault();

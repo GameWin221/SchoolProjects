@@ -14,18 +14,6 @@ struct Node
 	Node* right;
 };
 
-bool YesNoQuestion()
-{
-	std::string decision{""};
-
-	std::cin >> decision;
-
-	for (auto& c : decision)
-		c = std::tolower(c);
-
-	return decision[0] == 'y' || decision[0] == 't';
-}
-
 // Write a node along its children recursively to a file (output stream)
 void NodeToStream(const Node* node, std::ofstream& file)
 {
@@ -117,78 +105,128 @@ Node* LoadTree(const std::string&& fileName)
 
 int main()
 {
-	NetworkHandler networkHandler;
-
-	networkHandler.Start();
-	
-	/*
 	Node* firstNode = LoadTree("Saved.tree");
 
-	std::cout << "Pomysl o jakims zwierzeciu a ten program sprobuje je zgadnac (sprobuj kilka razy, to sie uczy na bledach):\n";
+	Node* currentNode = firstNode;
+	bool lastQuestion = false;
 
-	int attempt = 0;
+	std::string enteredAnimal{};
 
-	while (1)
-	{
-		std::cout << "\nProba nr. " << attempt++ << ":\n";
+	NetworkHandler networkHandler([&currentNode, &lastQuestion, &enteredAnimal, firstNode](std::string operation, std::string text) {
+		std::string expectation{};
+		std::string response{};
 
-		Node* currentNode = firstNode;
+		for (auto& c : text)
+			if (c == '_')
+				c = ' ';
 
-		while (currentNode->right && currentNode->left)
+		if (operation == "answer") // If the program is still guessing
 		{
-			std::cout << currentNode->question << '\n';
+			bool yes = text == "yes";
 
-			if (YesNoQuestion())
-				currentNode = currentNode->right;
+			if (lastQuestion)
+			{
+				if (yes) // Restart if the program guessed the animal
+				{
+					expectation = "restart";
+					response = "restart";
+
+					SaveTree(firstNode, "Saved.tree");
+
+					currentNode = firstNode;
+					lastQuestion = false;
+					enteredAnimal.clear();
+				}
+				else // If the program has failed to guess the animal, ask the user about what animal they were thinking
+				{
+					expectation = "animal";
+					response = "O jakim zwierzeciu myslales? (podaj tylko nazwe)";
+				}
+			}
 			else
-				currentNode = currentNode->left;
+			{
+				if (yes) // Go right
+				{
+					currentNode = currentNode->right;
+
+					expectation = "answer";
+					response = currentNode->question;
+				}
+				else // Go left
+				{
+					currentNode = currentNode->left;
+
+					expectation = "answer";
+					response = currentNode->question;
+				}
+
+				if (!currentNode->left || !currentNode->right)
+					lastQuestion = true;
+			}
 		}
-
-		std::cout << currentNode->question << '\n';
-
-		if (YesNoQuestion())
+		else if (operation == "animal") // If the program has failed to guess the animal and the user typed in the correct animal
 		{
-			std::cout << "Zgadlem :))\n";
+			if (lastQuestion)
+			{
+				enteredAnimal = text;
+
+				std::string lastAnimal = currentNode->question.substr(
+					currentNode->question.find_last_of(' ') + 1,
+					currentNode->question.length() - currentNode->question.find_last_of(' ') - 2
+				);
+
+				expectation = "question";
+				response = "Jakim pytaniem mozna odroznic " + text + " od " + lastAnimal + "?";
+
+				// After the user types in the animal that they were thinking of, ask them how to differentiate it from the animal that the program has guessed 
+			}
+			else
+				std::cout << "The user entered animal when \'lastQuestion\' was false!\n";
+		}
+		else if (operation == "question") // If the program has failed to guess the animal and the user typed in the question that differentiates it from the guessed one
+		{
+			if (lastQuestion && !enteredAnimal.empty())
+			{
+				expectation = "restart";
+				response = "restart";
+
+				currentNode->right = new Node{
+					std::string{"Czy to "} + enteredAnimal + std::string{"?"},
+					nullptr,
+					nullptr,
+				};
+
+				currentNode->left = new Node{
+					currentNode->question,
+					nullptr,
+					nullptr
+				};
+
+				text[0] = std::toupper(text[0]);
+				text.push_back('?');
+
+				currentNode->question = text;
+
+				SaveTree(firstNode, "Saved.tree");
+
+				currentNode = firstNode;
+				lastQuestion = false;
+				enteredAnimal.clear();
+			}
+			else
+				std::cout << "The user entered question when \'lastQuestion\' was false!\n";
+		}
+		else if (operation == "start") // Starting the game
+		{
+			expectation = "answer";
+			response = currentNode->question; // Ask the question
 		}
 		else
-		{
-			std::string animal{ "" };
-			std::string question{ "" };
+			std::cout << "[NetworkHandler::Respond] - Wrong operation!\n";
 
-			//std::cout << "Nie zgadlem :((\n";
+		std::cout << "[IN]:  [" << operation << "]: \"" << text << "\"\n";
+		std::cout << "[OUT]: [" << expectation << "]: " << response << "\"\n";
 
-			std::cout << "O czym myslales? (Podaj tylko nazwe)\n";
-			std::cin >> animal;
-
-			for (auto& c : animal)
-				c = std::tolower(c);
-
-			std::string lastAnimal = currentNode->question.substr(
-				currentNode->question.find_last_of(' ')+1,
-				currentNode->question.length() - currentNode->question.find_last_of(' ') - 2
-			);
-
-			std::cout << "Jakim pytaniem mozna odroznic " << animal << " od " << lastAnimal << "?\n";
-
-			std::cin.ignore();
-			std::getline(std::cin, question);
-
-			currentNode->right = new Node{
-				std::string{"Czy to "} + animal + std::string{"?"},
-				nullptr,
-				nullptr,
-			};
-
-			currentNode->left = new Node{
-				currentNode->question,
-				nullptr,
-				nullptr
-			};
-
-			currentNode->question = question;
-
-			SaveTree(firstNode, "Saved.tree");
-		}
-	}
-	*/
+		return make_tuple(expectation, response);
+	});
 }
