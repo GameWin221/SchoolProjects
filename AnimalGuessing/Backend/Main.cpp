@@ -129,7 +129,7 @@ int main()
 				if (yes) // Restart if the program guessed the animal
 				{
 					expectation = "restart";
-					response = "restart";
+					response = "Zgadlem :)";
 
 					SaveTree(firstNode, "Saved.tree");
 
@@ -188,7 +188,7 @@ int main()
 			if (lastQuestion && !enteredAnimal.empty())
 			{
 				expectation = "restart";
-				response = "restart";
+				response = "Kolejna proba";
 
 				currentNode->right = new Node{
 					std::string{"Czy to "} + enteredAnimal + std::string{"?"},

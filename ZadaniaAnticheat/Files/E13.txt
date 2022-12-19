@@ -1,0 +1,8 @@
+alfabet = []
+for i in range(ord('a'), ord('z') + 1):
+  alfabet.append(chr(i))
+
+for c in input("Podaj zdanie: ").lower():
+  alfabet.remove(c)
+
+print(alfabet)

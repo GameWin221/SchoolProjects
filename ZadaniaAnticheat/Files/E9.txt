@@ -1,0 +1,6 @@
+s = input("Podaj zdanie: ")
+
+for c in s:
+  s = s.replace(c, c.capitalize())
+
+print(s[::-1])

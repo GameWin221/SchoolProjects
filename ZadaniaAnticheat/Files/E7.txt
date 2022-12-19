@@ -1,0 +1,1 @@
+print(input("Podaj zdanie: ")[::3])

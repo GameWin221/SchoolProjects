@@ -1,0 +1,23 @@
+from math import sqrt
+from random import randint
+
+def isTriangle(a, b, c):
+  edges = [a, b, c]
+  shorter = [a, b, c]
+  longest = max(boki)
+  shorter.remove(longest)
+
+  return sum(shorter) > longest
+
+def field(a, b, c):
+  p = (a + b + c) / 2
+
+  return sqrt(p * (p - a) * (p - b) * (p - c))
+
+for i in range(10001):
+  (a, b, c) = randint(1, 20), randint(1, 20), randint(1, 20)
+
+  if isTriangle(a, b, c):
+    p = field(a, b, c)
+    if p % 1 == 0:
+      print(f"pole: {p}, a: {a}, b: {b}, c: {c}")

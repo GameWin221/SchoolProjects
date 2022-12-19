@@ -1,0 +1,11 @@
+zdanie = input("Podaj zdanie: ").split(' ')
+
+for i in range(len(zdanie)):
+  if len(zdanie[i]) % 3 == 0:
+    zdanie[i] = zdanie[i][::-1]
+
+s = ""
+for z in zdanie:
+  s += z + ' '
+
+print(s)	

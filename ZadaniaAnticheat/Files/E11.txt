@@ -1,0 +1,7 @@
+litery = []
+for c in input("Podaj zdanie: "):
+  litery.append(c)
+
+litery.sort()
+
+print(litery)

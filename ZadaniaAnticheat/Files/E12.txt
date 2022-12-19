@@ -1,0 +1,17 @@
+s = input("Podaj zdanie: ")
+n = ""
+
+overflow = ord('z') - ord('a') + 1
+
+for i in range(len(s)):
+
+  c = s[i].lower()
+
+  idx = ord(c) + 2
+
+  if idx > ord('z'):
+    n += chr(idx - overflow)
+  else:
+    n += chr(idx)
+
+print(n)

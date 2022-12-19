@@ -1,0 +1,15 @@
+najwieksza = 0
+najwiekszeDzielniki = 0
+
+for i in range(1000, 7001):
+  dzielniki = 2
+
+  for j in range(2, int(i / 2) + 1):
+    if (i / j) % 1 == 0:
+      dzielniki += 1
+
+  if dzielniki > najwiekszeDzielniki:
+    najwieksza = i
+    najwiekszeDzielniki = dzielniki
+
+print(najwieksza)

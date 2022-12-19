@@ -1,0 +1,25 @@
+from random import randint
+from math import sqrt
+
+
+def dobryTrojkat(a, b, c):
+  boki = [a, b, c]
+  krotsze = [a, b, c]
+  najdluzsy = max(boki)
+  krotsze.remove(najdluzsy)
+
+  return sum(krotsze) > najdluzsy
+
+
+def pole(a, b, c):
+  p = (a + b + c) / 2
+  return sqrt(p * (p - a) * (p - b) * (p - c))
+
+
+for i in range(10001):
+  a, b, c = randint(1, 20), randint(1, 20), randint(1, 20)
+
+  if dobryTrojkat(a, b, c):
+    p = pole(a, b, c)
+    if p % 1 == 0:
+      print(f"pole: {p}, a: {a}, b: {b}, c: {c}")

@@ -1,0 +1,8 @@
+slowa = input("Podaj zdanie: ").split(' ')
+najdluzse = ""
+
+for s in slowa:
+  if len(s) > len(najdluzse):
+    najdluzse = s
+
+print(najdluzse)
