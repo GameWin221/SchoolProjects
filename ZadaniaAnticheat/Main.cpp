@@ -3,6 +3,10 @@
 #include <algorithm>
 #include <string>
 #include <filesystem>
+#include <array>
+#include <vector>
+#include <unordered_map>
+
 namespace fs = std::filesystem;
 
 std::string ReadFile(const std::string&& path)
@@ -38,27 +42,9 @@ double CalculateValue(const std::string& sourceCode)
     return v / sourceCode.length();
 }
 
-bool SimplestTest(const double& val/*, const std::vector<double>& sourceCodeValues*/)
+const inline bool IsOperator(const char c)
 {
-    return (val == /*any other value in sourceCodeValues*/ 0.0);
-}
-
-bool ComplexTest(const std::vector<std::string>& tokensA, const std::vector<std::string>& tokensB)
-{
-    uint64_t maxTokens{ std::max(tokensA.size(), tokensB.size()) };
-
-    uint32_t matchingTokens{};
-
-    for (uint32_t i{}; i < maxTokens; ++i)
-    {
-        const std::string a = tokensA[i];
-        const std::string b = tokensB[i];
-
-        if (a == b) // I need a better way to determine similarity
-            matchingTokens++;
-    }
-
-    return ((maxTokens - matchingTokens) / maxTokens > /*someThreshold*/ 0.5);
+    return c == '!' || (c >= 35 && c <= 47) || (c >= 58 && c <= 64) || (c >= 91 && c <= 96) || (c >= 123 && c <= 125);
 }
 
 std::vector<std::string> ToTokens(const std::string& sourceCode)
@@ -72,8 +58,13 @@ std::vector<std::string> ToTokens(const std::string& sourceCode)
     {
         char c = sourceCode[i];
 
+        // If 'c' is a start of a comment
+        if (c == '#')
+        {
+            while (i < sourceCode.length() && sourceCode[++i] != '\n');
+        }
         // If 'c' is the opening/closing of quotation
-        if (c == '\"' || c == '\'')
+        else if (c == '\"' || c == '\'')
         {
             isQuoting = !isQuoting;
 
@@ -103,7 +94,7 @@ std::vector<std::string> ToTokens(const std::string& sourceCode)
             }
         }
         // If 'c' is an operator or is quoting
-        else if (c == '!'|| (c >= 35 && c <= 47) || (c >= 58 && c <= 64) || (c >= 91 && c <= 96) || (c >= 123 && c <= 125))
+        else if (IsOperator(c))
         {
             if (i < sourceCode.length() && word.length() > 0)
             {
@@ -121,12 +112,118 @@ std::vector<std::string> ToTokens(const std::string& sourceCode)
     return tokens;
 }
 
+std::vector<std::string> OptimizeTokens(const std::vector<std::string>& tokens)
+{
+    std::vector<std::string> optimizedTokens(tokens.size());
+
+    optimizedTokens = tokens;
+
+    for (uint32_t i = 0U; i < tokens.size(); i++)
+    {
+        if (tokens[i] == "def" && tokens[i + 2] == "(")
+        {
+            std::string function = tokens[i + 1];
+            std::cout << "Found function: " << function << '\n';
+
+            for (auto& tok : optimizedTokens)
+            {
+                if (tok == function)
+                    tok = "function";
+            }
+        }
+        
+        else if (tokens[i] == "=" && tokens[i+1] != "=")
+        {
+            //char c = tokens[i - 1][0];
+
+            //if (IsOperator(c))
+            //{
+            //    int j = i - 1;
+            //    
+            //    while (tokens[j][0] != c - 1 && tokens[j][0] != c - 2)
+            //        j--;
+            //
+            //    std::vector<std::string> variables{};
+            //
+            //    std::cout << j << ' ' << i << '\n';
+            //
+            //    for (int k = j; k < i - 1; k++)
+            //        if (!IsOperator(tokens[k][0]))
+            //            variables.emplace_back(tokens[k]);
+            //
+            //    for(const auto& var : variables)
+            //        std::cout << "Found variable in a tuple: " << var << '\n';
+            //}
+            //else
+            if(!IsOperator(tokens[i-1][0]))
+            {
+                std::string variable = tokens[i - 1];
+                std::cout << "Found variable: " << variable << '\n';
+
+                for (auto& tok : optimizedTokens)
+                {
+                    if (tok == variable)
+                        tok = "var";
+                }
+            }
+        }
+        
+    }
+
+    return optimizedTokens;
+}
+
 int main()
 {
-    auto tokens = ToTokens(ReadFile("Files/D10.txt"));
+    std::srand(time(0));
 
-    for (const auto& tok : tokens)
-        std::cout << '|' << tok << '|' << '\n';
+    auto tokensA = OptimizeTokens(ToTokens(ReadFile("Files/D10.txt")));
+    auto tokensB = OptimizeTokens(ToTokens(ReadFile("Files/D10Plagiat.txt")));
+    
+    std::unordered_map<std::string, uint32_t> tokenCountA{};
+    std::unordered_map<std::string, uint32_t> tokenCountB{};
+
+    for (const auto& tok : tokensA)
+    {
+        if (tokenCountA.count(tok) > 0)
+            tokenCountA.at(tok)++;
+        else
+            tokenCountA[tok] = 0;
+        //std::cout << '|' << tok << '|' << '\n';
+    }
+    for (const auto& tok : tokensB)
+    {
+        if (tokenCountB.count(tok) > 0)
+            tokenCountB.at(tok)++;
+        else
+            tokenCountB[tok] = 0;
+        //std::cout << '|' << tok << '|' << '\n';
+    }
+
+
+    uint32_t allTokenCounts = tokenCountA.size();
+    uint32_t matchingTokenCounts = 0U;
+
+    for (const auto& [token, count] : tokenCountA)
+    {
+        if (tokenCountB.count(token) > 0)
+            if (tokenCountB.at(token) == count)
+                matchingTokenCounts++;
+    }
+
+    std::cout << "Matching token counts for tokenCountA: " << matchingTokenCounts << ", this is " << (float)matchingTokenCounts / allTokenCounts << "%!\n";
+
+    allTokenCounts = tokenCountA.size();
+    matchingTokenCounts = 0U;
+
+    for (const auto& [token, count] : tokenCountB)
+    {
+        if (tokenCountA.count(token) > 0)
+            if (tokenCountA.at(token) == count)
+                matchingTokenCounts++;
+    }
+    
+    std::cout << "Matching token counts for tokenCountB: " << matchingTokenCounts << ", this is " << (float)matchingTokenCounts / allTokenCounts << "%!\n";
 
     //for (const auto& entry : fs::directory_iterator("Files"))
         //std::cout << entry.path().string() << ": " << CalculateValue(ReadFile(entry.path().string())) << '\n';
