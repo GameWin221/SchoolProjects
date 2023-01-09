@@ -44,7 +44,7 @@ double CalculateValue(const std::string& sourceCode)
 
 const inline bool IsOperator(const char c)
 {
-    return c == '!' || (c >= 35 && c <= 47) || (c >= 58 && c <= 64) || (c >= 91 && c <= 96) || (c >= 123 && c <= 125);
+    return c == '!' || ((c >= 35 && c <= 47) && c != '\'') || (c >= 58 && c <= 64) || (c >= 91 && c <= 96) || (c >= 123 && c <= 126);
 }
 
 std::vector<std::string> ToTokens(const std::string& sourceCode)
@@ -177,11 +177,12 @@ int main()
 {
     std::srand(time(0));
 
-    auto tokensA = OptimizeTokens(ToTokens(ReadFile("Files/D10.txt")));
-    auto tokensB = OptimizeTokens(ToTokens(ReadFile("Files/D10Plagiat.txt")));
-    
+    auto tokensA = /*OptimizeTokens*/(ToTokens(ReadFile("Files/D10.txt")));
+    auto tokensB = /*OptimizeTokens*/(ToTokens(ReadFile("Files/D10Plagiat.txt")));
+
     std::unordered_map<std::string, uint32_t> tokenCountA{};
     std::unordered_map<std::string, uint32_t> tokenCountB{};
+
 
     for (const auto& tok : tokensA)
     {
@@ -189,6 +190,7 @@ int main()
             tokenCountA.at(tok)++;
         else
             tokenCountA[tok] = 0;
+   
         //std::cout << '|' << tok << '|' << '\n';
     }
     for (const auto& tok : tokensB)
@@ -200,6 +202,8 @@ int main()
         //std::cout << '|' << tok << '|' << '\n';
     }
 
+    std::cout << tokenCountA.size() << '\n';
+    std::cout << tokenCountB.size() << '\n';
 
     uint32_t allTokenCounts = tokenCountA.size();
     uint32_t matchingTokenCounts = 0U;
